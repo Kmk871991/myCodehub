@@ -1,19 +1,21 @@
 Sub CreateCursiveGuideWithColumns()
     ' Input dialog for user to specify parameters
     Dim startX As Double, startY As Double
-    Dim width As Double, rows As Integer, columns As Integer, gutter As Double
+    Dim width As Double, rows As Integer, columns As Integer, gutter As Double, lineSpacing As Double
     startX = CDbl(InputBox("Enter the starting X position (in mm):", "Start X", 10))
     startY = CDbl(InputBox("Enter the starting Y position (in mm):", "Start Y", 10))
     width = CDbl(InputBox("Enter the width of each 4-line set (in mm):", "Width", 210)) ' Default width for A4 page
     rows = CInt(InputBox("Enter the number of rows:", "Rows", 10))
     columns = CInt(InputBox("Enter the number of columns:", "Columns", 5))
     gutter = CDbl(InputBox("Enter the gutter space between each row (in mm):", "Gutter", 8))
+    lineSpacing = CDbl(InputBox("Enter the spacing between each line (in mm):", "Line Spacing", 4))
 
     ' Convert mm to document units (CorelDRAW often uses inches internally)
     startX = startX * 0.0393701 ' Convert mm to inches
     startY = startY * 0.0393701
     width = width * 0.0393701
     gutter = gutter * 0.0393701
+    lineSpacing = lineSpacing * 0.0393701 ' Convert line spacing to inches
 
     Dim doc As Document
     Set doc = ActiveDocument
@@ -32,7 +34,7 @@ Sub CreateCursiveGuideWithColumns()
     Dim lightPurple As Color
     Set lightPurple = CreateCMYKColor(30, 30, 0, 0) ' Light purple for column dividers
 
-    ' Create the 4-line guide for each row with a fixed height of 4mm between each line
+    ' Create the 4-line guide for each row with a user-defined height between each line
     Dim i As Integer, j As Integer, x As Double, y As Double
     y = startY ' Starting Y position
     x = startX ' Starting X position
@@ -40,29 +42,31 @@ Sub CreateCursiveGuideWithColumns()
     For i = 1 To rows
         ' Draw the top line
         ActiveLayer.CreateLineSegment(x, y, x + width, y).Outline.Color = red
-        ' Draw the first middle line (4mm below top line)
-        ActiveLayer.CreateLineSegment(x, y - (4 * 0.0393701), x + width, y - (4 * 0.0393701)).Outline.Color = lightBlue
-        ' Draw the second middle line (8mm below top line)
-        ActiveLayer.CreateLineSegment(x, y - (8 * 0.0393701), x + width, y - (8 * 0.0393701)).Outline.Color = lightBlue
-        ' Draw the bottom line (12mm below top line)
-        ActiveLayer.CreateLineSegment(x, y - (12 * 0.0393701), x + width, y - (12 * 0.0393701)).Outline.Color = red
+        ' Draw the first middle line (lineSpacing below top line)
+        ActiveLayer.CreateLineSegment(x, y - lineSpacing, x + width, y - lineSpacing).Outline.Color = lightBlue
+        ' Draw the second middle line (2 * lineSpacing below top line)
+        ActiveLayer.CreateLineSegment(x, y - (2 * lineSpacing), x + width, y - (2 * lineSpacing)).Outline.Color = lightBlue
+        ' Draw the bottom line (3 * lineSpacing below top line)
+        ActiveLayer.CreateLineSegment(x, y - (3 * lineSpacing), x + width, y - (3 * lineSpacing)).Outline.Color = red
 
-        ' Move to the next row position (12mm total height)
-        y = y - (12 * 0.0393701) - gutter ' This ensures each 4-line set is 12mm tall, with specified gutter spacing
+        ' Move to the next row position (3 * lineSpacing total height)
+        y = y - (3 * lineSpacing) - gutter ' This ensures each 4-line set is adjusted based on the specified lineSpacing, with specified gutter spacing
     Next i
 
-' Draw column dividers
-Dim columnPosition As Double
-columnPosition = startX + columnWidth
+    ' Draw column dividers
+    Dim columnPosition As Double
+    columnPosition = startX + columnWidth
 
-For j = 1 To columns - 1 ' Draw dividers between columns, stopping before the last column
-    ' Draw a vertical line from the top of the first set to the bottom of the last set's bottom line
-    ActiveLayer.CreateLineSegment(columnPosition, startY, columnPosition, y + (12 * 0.0265)).Outline.Color = lightPurple
-    columnPosition = columnPosition + columnWidth ' Move to the next column position
-Next j
+    ' Adjust the end Y position to align precisely with the bottom red line of the last set
+    Dim endY As Double
+    endY = y + (3 * lineSpacing) ' Move to the position of the last bottom red line
+
+    For j = 1 To columns - 1 ' Draw dividers between columns, stopping before the last column
+        ' Draw a vertical line from the top of the first set to the bottom of the last set's bottom line
+        ActiveLayer.CreateLineSegment(columnPosition, startY, columnPosition, endY).Outline.Color = lightPurple
+        columnPosition = columnPosition + columnWidth ' Move to the next column position
+    Next j
 
     MsgBox "Cursive 4-line guides with columns created successfully!"
 End Sub
-
-
 
