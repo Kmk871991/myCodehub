@@ -59,7 +59,7 @@ Sub CreateCursiveGuideWithColumns()
 
     ' Adjust the end Y position to align precisely with the bottom red line of the last set
     Dim endY As Double
-    endY = y + (3 * lineSpacing) ' Move to the position of the last bottom red line
+    endY = y + (1.95 * lineSpacing) ' Move to the position of the last bottom red line
 
     For j = 1 To columns - 1 ' Draw dividers between columns, stopping before the last column
         ' Draw a vertical line from the top of the first set to the bottom of the last set's bottom line
