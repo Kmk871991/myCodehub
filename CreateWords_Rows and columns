@@ -1,0 +1,90 @@
+Sub CreateWordsGridWithProperAlignment()
+
+    ' Variables
+    Dim doc As Document
+    Dim layer As Layer
+    Dim wordList As String
+    Dim words() As String
+    Dim numRows As Integer
+    Dim numCols As Integer
+    Dim row As Integer
+    Dim col As Integer
+    Dim xPos As Double
+    Dim yPos As Double
+    Dim wordIndex As Integer
+    Dim wordText As Shape
+    Dim startX As Double
+    Dim startY As Double
+    Dim gutterX As Double
+    Dim gutterY As Double
+    Dim textWidth As Double
+    Dim textHeight As Double
+    Dim maxWidth As Double
+    Dim maxHeight As Double
+    
+    ' Set active document and active layer
+    Set doc = ActiveDocument
+    Set layer = doc.ActiveLayer
+    
+    ' Ensure the units are in millimeters
+    doc.Unit = cdrMillimeter
+    
+    ' Ask for user input
+    wordList = InputBox("Enter words separated by commas:")
+    numRows = CInt(InputBox("Enter the number of rows:"))
+    numCols = CInt(InputBox("Enter the number of columns:"))
+    
+    ' Define starting position and gutter spacing in millimeters
+    startX = 10    ' Starting X position in mm
+    startY = 10    ' Starting Y position in mm
+    gutterX = CDbl(InputBox("Enter the horizontal gutter spacing in mm (space between columns):")) ' Gutter between columns
+    gutterY = CDbl(InputBox("Enter the vertical gutter spacing in mm (space between rows):")) ' Gutter between rows
+    
+    ' Split words into an array
+    words = Split(wordList, ",")
+    
+    ' Initialize word index
+    wordIndex = 0
+    
+    ' Calculate maximum text width and height for proper alignment
+    For wordIndex = 0 To UBound(words)
+        Set wordText = layer.CreateArtisticText(0, 0, Trim(words(wordIndex)))
+        textWidth = wordText.SizeWidth
+        textHeight = wordText.SizeHeight
+        
+        If textWidth > maxWidth Then
+            maxWidth = textWidth
+        End If
+        
+        If textHeight > maxHeight Then
+            maxHeight = textHeight
+        End If
+        
+        ' Delete the temporary text object (not needed)
+        wordText.Delete
+    Next wordIndex
+    
+    ' Reset word index to place words in the grid
+    wordIndex = 0
+    
+    ' Loop through rows and columns to place the text properly aligned
+    For row = 0 To numRows - 1
+        For col = 0 To numCols - 1
+            If wordIndex < UBound(words) + 1 Then
+                ' Calculate new X and Y position using maximum width and height plus gutter spacing
+                xPos = startX + col * (maxWidth + gutterX)
+                yPos = startY - row * (maxHeight + gutterY)
+                
+                ' Create text shape for the word
+                Set wordText = layer.CreateArtisticText(xPos, yPos, Trim(words(wordIndex)))
+                
+                ' Move the text to calculated position
+                wordText.SetPosition xPos, yPos
+                
+                ' Move to the next word
+                wordIndex = wordIndex + 1
+            End If
+        Next col
+    Next row
+
+End Sub
