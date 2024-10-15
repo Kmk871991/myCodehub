@@ -1,18 +1,14 @@
-Sub CreateRoundedBoxAroundObjectWithExtraSpace()
+Sub CreateBoxAroundObjectWithExtraSpace()
     Dim sr As ShapeRange
     Dim newBox As Shape
     Dim newWidth As Double
     Dim newHeight As Double
     Dim extraWidth As Double
     Dim extraHeight As Double
-    Dim cornerRadius As Double
 
     ' Define the additional size in millimeters
     extraWidth = 8    ' Add 8mm to the width
     extraHeight = 16  ' Add 16mm to the height
-    
-    ' Define the corner radius in millimeters (adjust this value as needed)
-    cornerRadius = 2  ' You can adjust this radius for different rounding
 
     ' Ensure document units are in millimeters
     ActiveDocument.Unit = cdrMillimeter
@@ -30,11 +26,8 @@ Sub CreateRoundedBoxAroundObjectWithExtraSpace()
     newWidth = sr.SizeWidth + extraWidth
     newHeight = sr.SizeHeight + extraHeight
     
-    ' Create the rounded rectangle (box) around the selected shape
+    ' Create the box around the selected shape
     Set newBox = ActiveLayer.CreateRectangle2(sr.LeftX - (extraWidth / 2), sr.BottomY - (extraHeight / 2), newWidth, newHeight)
-    
-    ' Set the corner radius for rounded corners
-    newBox.SetRectangleRoundness cornerRadius / newWidth * 100, cornerRadius / newHeight * 100
     
     ' Optionally, you can group the box and object together
     sr.AddToSelection
