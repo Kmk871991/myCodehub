@@ -1,0 +1,46 @@
+Sub ResampleResolutionTo300DPIWithoutResizing()
+    Dim sr As ShapeRange
+    Set sr = ActiveSelectionRange
+    
+    ' Check if something is selected and it is a bitmap
+    If sr.Count = 0 Then
+        MsgBox "Please select a bitmap image."
+        Exit Sub
+    End If
+    
+    ' Check if the selected object is a bitmap
+    If sr(1).Type <> cdrBitmapShape Then
+        MsgBox "Selected object is not a bitmap."
+        Exit Sub
+    End If
+    
+    ' Get the current bitmap and its properties
+    Dim bmp As Bitmap
+    Set bmp = sr(1).Bitmap
+    
+    ' Get the current DPI
+    Dim currentHRes As Double
+    Dim currentVRes As Double
+    currentHRes = bmp.ResolutionX
+    currentVRes = bmp.ResolutionY
+    
+    ' Get the current size of the bitmap
+    Dim originalWidth As Double
+    Dim originalHeight As Double
+    originalWidth = sr(1).SizeWidth
+    originalHeight = sr(1).SizeHeight
+    
+    ' Check if the DPI is greater than 300 and resample if needed
+    If currentHRes > 300 Or currentVRes > 300 Then
+        ' Resample to 300 DPI without changing the physical size
+        bmp.Resample 300, 300, cdrAntiAliasingNone, False
+        
+        ' Maintain the original width and height
+        sr(1).SetSize originalWidth, originalHeight
+        
+        MsgBox "Image resampled to 300 DPI without changing size."
+    Else
+        MsgBox "Image DPI is 300 or less. No resampling needed."
+    End If
+End Sub
+
