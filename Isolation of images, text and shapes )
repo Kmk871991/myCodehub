@@ -1,0 +1,235 @@
+'Including master layer
+
+' Macro to hide all text objects on the active page
+Sub HideTextOnActivePage()
+    Dim s As Shape
+    Dim sr As ShapeRange
+    
+    ' Create a ShapeRange for all shapes on the active page
+    Set sr = ActivePage.Shapes.All
+    
+    ' Loop through each shape and hide text objects
+    For Each s In sr
+        If s.Type = cdrTextShape Then
+            s.Visible = False
+        End If
+    Next s
+End Sub
+
+' Macro to hide all shapes (non-text) on the active page
+Sub HideShapesOnActivePage()
+    Dim s As Shape
+    Dim sr As ShapeRange
+    
+    ' Create a ShapeRange for all shapes on the active page
+    Set sr = ActivePage.Shapes.All
+    
+    ' Loop through each shape and hide non-text shapes
+    For Each s In sr
+        If s.Type <> cdrTextShape And s.Type <> cdrBitmapShape Then
+            s.Visible = False
+        End If
+    Next s
+End Sub
+
+' Macro to hide all images (bitmaps) on the active page
+Sub HideImagesOnActivePage()
+    Dim s As Shape
+    Dim sr As ShapeRange
+    
+    ' Create a ShapeRange for all shapes on the active page
+    Set sr = ActivePage.Shapes.All
+    
+    ' Loop through each shape and hide bitmaps
+    For Each s In sr
+        If s.Type = cdrBitmapShape Then
+            s.Visible = False
+        End If
+    Next s
+End Sub
+
+' Macro to unhide all text objects on the active page
+Sub UnhideTextOnActivePage()
+    Dim s As Shape
+    Dim sr As ShapeRange
+    
+    ' Create a ShapeRange for all shapes on the active page
+    Set sr = ActivePage.Shapes.All
+    
+    ' Loop through each shape and unhide text objects
+    For Each s In sr
+        If s.Type = cdrTextShape Then
+            s.Visible = True
+        End If
+    Next s
+End Sub
+
+' Macro to unhide all shapes (non-text) on the active page
+Sub UnhideShapesOnActivePage()
+    Dim s As Shape
+    Dim sr As ShapeRange
+    
+    ' Create a ShapeRange for all shapes on the active page
+    Set sr = ActivePage.Shapes.All
+    
+    ' Loop through each shape and unhide non-text shapes
+    For Each s In sr
+        If s.Type <> cdrTextShape And s.Type <> cdrBitmapShape Then
+            s.Visible = True
+        End If
+    Next s
+End Sub
+
+' Macro to unhide all images (bitmaps) on the active page
+Sub UnhideImagesOnActivePage()
+    Dim s As Shape
+    Dim sr As ShapeRange
+    
+    ' Create a ShapeRange for all shapes on the active page
+    Set sr = ActivePage.Shapes.All
+    
+    ' Loop through each shape and unhide bitmaps
+    For Each s In sr
+        If s.Type = cdrBitmapShape Then
+            s.Visible = True
+        End If
+    Next s
+End Sub
+
+
+'Excluding Master Layer
+
+' Macro to hide all text objects on the active page, excluding the Master Layer
+Sub HideTextOnActivePage()
+    Dim s As Shape
+    Dim sr As ShapeRange
+    Dim l As Layer
+    
+    ' Loop through each layer on the active page, excluding the Master Layer
+    For Each l In ActivePage.Layers
+        If l.Name <> "Master Page" Then
+            ' Create a ShapeRange for all shapes on the current layer
+            Set sr = l.Shapes.All
+            
+            ' Loop through each shape and hide text objects
+            For Each s In sr
+                If s.Type = cdrTextShape Then
+                    s.Visible = False
+                End If
+            Next s
+        End If
+    Next l
+End Sub
+
+' Macro to hide all shapes (non-text) on the active page, excluding the Master Layer
+Sub HideShapesOnActivePage()
+    Dim s As Shape
+    Dim sr As ShapeRange
+    Dim l As Layer
+    
+    ' Loop through each layer on the active page, excluding the Master Layer
+    For Each l In ActivePage.Layers
+        If l.Name <> "Master Page" Then
+            ' Create a ShapeRange for all shapes on the current layer
+            Set sr = l.Shapes.All
+            
+            ' Loop through each shape and hide non-text shapes
+            For Each s In sr
+                If s.Type <> cdrTextShape And s.Type <> cdrBitmapShape Then
+                    s.Visible = False
+                End If
+            Next s
+        End If
+    Next l
+End Sub
+
+' Macro to hide all images (bitmaps) on the active page, excluding the Master Layer
+Sub HideImagesOnActivePage()
+    Dim s As Shape
+    Dim sr As ShapeRange
+    Dim l As Layer
+    
+    ' Loop through each layer on the active page, excluding the Master Layer
+    For Each l In ActivePage.Layers
+        If l.Name <> "Master Page" Then
+            ' Create a ShapeRange for all shapes on the current layer
+            Set sr = l.Shapes.All
+            
+            ' Loop through each shape and hide bitmaps
+            For Each s In sr
+                If s.Type = cdrBitmapShape Then
+                    s.Visible = False
+                End If
+            Next s
+        End If
+    Next l
+End Sub
+
+' Macro to unhide all text objects on the active page, excluding the Master Layer
+Sub UnhideTextOnActivePage()
+    Dim s As Shape
+    Dim sr As ShapeRange
+    Dim l As Layer
+    
+    ' Loop through each layer on the active page, excluding the Master Layer
+    For Each l In ActivePage.Layers
+        If l.Name <> "Master Page" Then
+            ' Create a ShapeRange for all shapes on the current layer
+            Set sr = l.Shapes.All
+            
+            ' Loop through each shape and unhide text objects
+            For Each s In sr
+                If s.Type = cdrTextShape Then
+                    s.Visible = True
+                End If
+            Next s
+        End If
+    Next l
+End Sub
+
+' Macro to unhide all shapes (non-text) on the active page, excluding the Master Layer
+Sub UnhideShapesOnActivePage()
+    Dim s As Shape
+    Dim sr As ShapeRange
+    Dim l As Layer
+    
+    ' Loop through each layer on the active page, excluding the Master Layer
+    For Each l In ActivePage.Layers
+        If l.Name <> "Master Page" Then
+            ' Create a ShapeRange for all shapes on the current layer
+            Set sr = l.Shapes.All
+            
+            ' Loop through each shape and unhide non-text shapes
+            For Each s In sr
+                If s.Type <> cdrTextShape And s.Type <> cdrBitmapShape Then
+                    s.Visible = True
+                End If
+            Next s
+        End If
+    Next l
+End Sub
+
+' Macro to unhide all images (bitmaps) on the active page, excluding the Master Layer
+Sub UnhideImagesOnActivePage()
+    Dim s As Shape
+    Dim sr As ShapeRange
+    Dim l As Layer
+    
+    ' Loop through each layer on the active page, excluding the Master Layer
+    For Each l In ActivePage.Layers
+        If l.Name <> "Master Page" Then
+            ' Create a ShapeRange for all shapes on the current layer
+            Set sr = l.Shapes.All
+            
+            ' Loop through each shape and unhide bitmaps
+            For Each s In sr
+                If s.Type = cdrBitmapShape Then
+                    s.Visible = True
+                End If
+            Next s
+        End If
+    Next l
+End Sub
+
+
+
