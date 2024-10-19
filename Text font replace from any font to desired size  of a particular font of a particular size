@@ -1,0 +1,21 @@
+Sub textFont1()
+Dim p As Page, s As shape, sr As ShapeRange
+Dim i&, f$, fNew$
+
+f = "Poshold " 'your font to find
+fNew = "Poshold " 'new font
+
+i = ActivePage.Index
+For Each p In ActiveDocument.Pages
+p.Activate
+Set sr = ActivePage.Shapes.FindShapes(query:="@type = 'text:artistic' and @com.text.story.font = '" & f & "'")
+For Each s In sr
+If s.Text.Story.Size = 22.527 Then
+s.Text.Story.Font = fNew
+s.Text.Story.Size = 24
+'set size
+End If
+Next s
+Next p
+ActiveDocument.Pages(i).Activate
+End Sub
