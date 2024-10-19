@@ -1,0 +1,31 @@
+' Macro to change the size of a particular font to the desired size on the active page
+Sub ChangeFontSizeForSpecificFont()
+    Dim s As Shape
+    Dim sr As ShapeRange
+    Dim l As Layer
+    Dim desiredFontName As String
+    Dim desiredFontSize As Double
+    
+    ' Specify the font name you want to target (replace with the desired font)
+    desiredFontName = "Arial" ' Example: Replace with your desired font name
+    
+    ' Specify the desired font size
+    desiredFontSize = 24 ' Example: Replace with your desired font size
+    
+    ' Loop through each layer on the active page
+    For Each l In ActivePage.Layers
+        If l.Name <> "Master Page" Then ' Exclude Master Layer
+            ' Loop through each shape on the current layer
+            For Each s In l.Shapes.All
+                ' Check if the shape is a text shape
+                If s.Type = cdrTextShape Then
+                    ' Check if the font name matches the desired font
+                    If s.Text.Story.Font = desiredFontName Then
+                        ' Change the font size to the desired size
+                        s.Text.Story.Size = desiredFontSize
+                    End If
+                End If
+            Next s
+        End If
+    Next l
+End Sub
