@@ -1,0 +1,50 @@
+' Macro to isolate selected shapes (hide everything else on the active page, excluding the Master Layer)
+Sub IsolateSelectedShapes()
+    Dim s As shape
+    Dim sr As ShapeRange
+    Dim selectedShapes As ShapeRange
+    Dim l As layer
+    
+    ' Get the selected shapes in the active selection
+    Set selectedShapes = ActiveSelectionRange
+    
+    ' Check if any shapes are selected
+    If selectedShapes.Count > 0 Then
+        ' Loop through each layer on the active page, excluding the Master Layer
+        For Each l In ActivePage.Layers
+            If l.Name <> "Master Page" Then
+                ' Hide all shapes on the current layer
+                Set sr = l.Shapes.All
+                For Each s In sr
+                    s.Visible = False
+                Next s
+            End If
+        Next l
+        
+        ' Unhide only the selected shapes
+        For Each s In selectedShapes
+            s.Visible = True
+        Next s
+    Else
+        MsgBox "No shapes are selected."
+    End If
+End Sub
+
+' Macro to unhide all shapes on the active page, excluding the Master Layer
+Sub UnhideAllShapes()
+    Dim s As shape
+    Dim sr As ShapeRange
+    Dim l As layer
+    
+    ' Loop through each layer on the active page, excluding the Master Layer
+    For Each l In ActivePage.Layers
+        If l.Name <> "Master Page" Then
+            ' Unhide all shapes on the current layer
+            Set sr = l.Shapes.All
+            For Each s In sr
+                s.Visible = True
+            Next s
+        End If
+    Next l
+End Sub
+
