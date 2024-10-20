@@ -1,4 +1,4 @@
-Sub CreateBoxesWithLeftRightMarginsAndPastelFill()
+Sub Columns()
     ' Variables
     Dim numBoxes As Integer
     Dim docWidthPixels As Double
@@ -68,6 +68,85 @@ Sub CreateBoxesWithLeftRightMarginsAndPastelFill()
         ' Create the box at the calculated position
         Dim box As Shape
         Set box = ActiveLayer.CreateRectangle(xPos / DPI, yPos / DPI, (xPos + boxWidthPixels) / DPI, boxHeightPixels / DPI)
+        
+        ' Set the fill color to a light pastel shade (light pastel pink in this case)
+        ' You can modify this to use different pastel colors if needed
+        box.Fill.ApplyUniformFill CreateCMYKColor(5, 10, 0, 0) ' Light pastel color in CMYK
+    Next i
+End Sub
+
+
+
+Sub Rows()
+    ' Variables
+    Dim numBoxes As Integer
+    Dim docWidthPixels As Double
+    Dim docHeightPixels As Double
+    Dim boxWidthPixels As Double
+    Dim boxHeightPixels As Double
+    Dim i As Integer
+    Dim xPos As Double
+    Dim yPos As Double
+    Dim marginTopBottom As Double
+    Dim gutter As Double
+    Dim unit As String
+    Dim conversionFactor As Double
+    
+    ' 300 DPI (Dots Per Inch)
+    Const DPI As Double = 300
+    Const MM_TO_INCH As Double = 25.4 ' Millimeters to inches conversion factor
+    
+    ' Prompt user for the number of boxes
+    numBoxes = InputBox("Enter the number of boxes to create:", "Create Boxes", 5)
+    
+    ' Prompt user for the unit type (mm or px)
+    unit = InputBox("Enter the unit for margin and gutter (mm or px):", "Unit Selection", "mm")
+    
+    ' Conversion factor for units
+    If unit = "mm" Then
+        ' If using millimeters, convert mm to inches, then inches to pixels
+        conversionFactor = DPI / MM_TO_INCH
+    ElseIf unit = "px" Then
+        ' If using pixels, no conversion needed
+        conversionFactor = 1
+    Else
+        MsgBox "Invalid unit! Please use 'mm' or 'px'."
+        Exit Sub
+    End If
+    
+    ' Prompt user for top and bottom margin size
+    marginTopBottom = InputBox("Enter the top/bottom margin size (in " & unit & "):", "Margin Input", 5)
+    
+    ' Prompt user for gutter size
+    gutter = InputBox("Enter the gutter size between boxes (in " & unit & "):", "Gutter Input", 2)
+    
+    ' Convert margin and gutter to pixels based on the unit
+    Dim marginTopBottomPixels As Double
+    Dim gutterPixels As Double
+    marginTopBottomPixels = marginTopBottom * conversionFactor
+    gutterPixels = gutter * conversionFactor
+    
+    ' Get the document's dimensions in pixels (based on 300 DPI)
+    docWidthPixels = ActiveDocument.ActivePage.SizeWidth * DPI
+    docHeightPixels = ActiveDocument.ActivePage.SizeHeight * DPI
+    
+    ' Calculate available height inside top and bottom margins
+    Dim availableHeightPixels As Double
+    availableHeightPixels = docHeightPixels - (2 * marginTopBottomPixels) ' Subtract top and bottom margins from total height
+    
+    ' Calculate the height of each box, taking the gutter into account
+    boxHeightPixels = (availableHeightPixels - (gutterPixels * (numBoxes - 1))) / numBoxes
+    boxWidthPixels = docWidthPixels ' Full width of the document
+    
+    ' Loop to create boxes with gutter, top/bottom margins, and pastel color fill
+    For i = 1 To numBoxes
+        ' Calculate position for each box, considering top/bottom margins and gutters
+        yPos = marginTopBottomPixels + (i - 1) * (boxHeightPixels + gutterPixels) ' Add top margin and gutter
+        xPos = 0 ' Align all boxes on the left (no left or right margin)
+        
+        ' Create the box at the calculated position
+        Dim box As Shape
+        Set box = ActiveLayer.CreateRectangle(xPos / DPI, yPos / DPI, (xPos + boxWidthPixels) / DPI, (yPos + boxHeightPixels) / DPI)
         
         ' Set the fill color to a light pastel shade (light pastel pink in this case)
         ' You can modify this to use different pastel colors if needed
