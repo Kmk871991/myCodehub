@@ -1,0 +1,76 @@
+Sub CreateBoxesWithLeftRightMarginsAndPastelFill()
+    ' Variables
+    Dim numBoxes As Integer
+    Dim docWidthPixels As Double
+    Dim docHeightPixels As Double
+    Dim boxWidthPixels As Double
+    Dim boxHeightPixels As Double
+    Dim i As Integer
+    Dim xPos As Double
+    Dim yPos As Double
+    Dim marginLeftRight As Double
+    Dim gutter As Double
+    Dim unit As String
+    Dim conversionFactor As Double
+    
+    ' 300 DPI (Dots Per Inch)
+    Const DPI As Double = 300
+    Const MM_TO_INCH As Double = 25.4 ' Millimeters to inches conversion factor
+    
+    ' Prompt user for the number of boxes
+    numBoxes = InputBox("Enter the number of boxes to create:", "Create Boxes", 5)
+    
+    ' Prompt user for the unit type (mm or px)
+    unit = InputBox("Enter the unit for margin and gutter (mm or px):", "Unit Selection", "mm")
+    
+    ' Conversion factor for units
+    If unit = "mm" Then
+        ' If using millimeters, convert mm to inches, then inches to pixels
+        conversionFactor = DPI / MM_TO_INCH
+    ElseIf unit = "px" Then
+        ' If using pixels, no conversion needed
+        conversionFactor = 1
+    Else
+        MsgBox "Invalid unit! Please use 'mm' or 'px'."
+        Exit Sub
+    End If
+    
+    ' Prompt user for left and right margin size
+    marginLeftRight = InputBox("Enter the left/right margin size (in " & unit & "):", "Margin Input", 5)
+    
+    ' Prompt user for gutter size
+    gutter = InputBox("Enter the gutter size between boxes (in " & unit & "):", "Gutter Input", 2)
+    
+    ' Convert margin and gutter to pixels based on the unit
+    Dim marginLeftRightPixels As Double
+    Dim gutterPixels As Double
+    marginLeftRightPixels = marginLeftRight * conversionFactor
+    gutterPixels = gutter * conversionFactor
+    
+    ' Get the document's dimensions in pixels (based on 300 DPI)
+    docWidthPixels = ActiveDocument.ActivePage.SizeWidth * DPI
+    docHeightPixels = ActiveDocument.ActivePage.SizeHeight * DPI
+    
+    ' Calculate available width inside left and right margins
+    Dim availableWidthPixels As Double
+    availableWidthPixels = docWidthPixels - (2 * marginLeftRightPixels) ' Subtract left and right margins from total width
+    
+    ' Calculate the width of each box, taking the gutter into account
+    boxWidthPixels = (availableWidthPixels - (gutterPixels * (numBoxes - 1))) / numBoxes
+    boxHeightPixels = docHeightPixels ' Full height of the document
+    
+    ' Loop to create boxes with gutter, left/right margins, and pastel color fill
+    For i = 1 To numBoxes
+        ' Calculate position for each box, considering left/right margins and gutters
+        xPos = marginLeftRightPixels + (i - 1) * (boxWidthPixels + gutterPixels) ' Add left margin and gutter
+        yPos = 0 ' Align all boxes at the top (no top or bottom margin)
+        
+        ' Create the box at the calculated position
+        Dim box As Shape
+        Set box = ActiveLayer.CreateRectangle(xPos / DPI, yPos / DPI, (xPos + boxWidthPixels) / DPI, boxHeightPixels / DPI)
+        
+        ' Set the fill color to a light pastel shade (light pastel pink in this case)
+        ' You can modify this to use different pastel colors if needed
+        box.Fill.ApplyUniformFill CreateCMYKColor(5, 10, 0, 0) ' Light pastel color in CMYK
+    Next i
+End Sub
