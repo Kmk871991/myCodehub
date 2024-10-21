@@ -53,11 +53,13 @@ Sub ResampleShapes(sr As ShapeRange)
 
                 ' Resample only if the resolution is not 300 dpi
                 If dpiX <> 300 Or dpiY <> 300 Then
+                    ' Resample the image to 300 DPI
                     s.Bitmap.Resample 300, 300, cdrResampleImage
 
-                    ' Restore the original dimensions and position
+                    ' Restore the original dimensions and position explicitly
                     s.SetSize originalWidth, originalHeight
-                    s.SetPosition xPos, yPos
+                    s.LeftX = xPos
+                    s.BottomY = yPos
                 End If
             End If
         End If
