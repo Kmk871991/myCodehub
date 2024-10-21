@@ -1,0 +1,66 @@
+Sub ResampleImagesTo300DPI()
+    Dim p As Page
+    Dim s As Shape
+    Dim resampleOption As Integer
+    Dim resampleAllPages As Boolean
+    Dim sr As ShapeRange
+    
+    ' Ask user if they want to resample images on the active page or all pages
+    resampleOption = MsgBox("Would you like to resample images on all pages?" & vbCrLf & _
+                            "Yes for all pages, No for active page only.", vbYesNo + vbQuestion, "Resample Images")
+    If resampleOption = vbYes Then
+        resampleAllPages = True
+    Else
+        resampleAllPages = False
+    End If
+    
+    ' Loop through all pages or just the active page
+    If resampleAllPages Then
+        For Each p In ActiveDocument.Pages
+            p.Activate
+            Set sr = ActivePage.Shapes.FindShapes(, cdrBitmapShape)
+            ResampleShapes sr
+        Next p
+    Else
+        Set sr = ActivePage.Shapes.FindShapes(, cdrBitmapShape)
+        ResampleShapes sr
+    End If
+
+    MsgBox "All images have been resampled to 300 DPI.", vbInformation, "Resample Complete"
+End Sub
+
+Sub ResampleShapes(sr As ShapeRange)
+    Dim s As Shape
+    Dim dpiX As Double, dpiY As Double
+    Dim originalWidth As Double, originalHeight As Double
+    Dim xPos As Double, yPos As Double
+    
+    ' Loop through the selected shapes
+    For Each s In sr
+        On Error Resume Next ' Bypass any object that doesn't support bitmap properties
+        If s.Type = cdrBitmapShape Then
+            ' Ensure that the shape is a bitmap and supports the Bitmap property
+            If Not s.Bitmap Is Nothing Then
+                ' Get the original dimensions and position of the shape
+                originalWidth = s.SizeWidth
+                originalHeight = s.SizeHeight
+                xPos = s.LeftX
+                yPos = s.BottomY
+
+                ' Get the current resolution of the bitmap
+                dpiX = s.Bitmap.HorizontalResolution
+                dpiY = s.Bitmap.VerticalResolution
+
+                ' Resample only if the resolution is not 300 dpi
+                If dpiX <> 300 Or dpiY <> 300 Then
+                    s.Bitmap.Resample 300, 300, cdrResampleImage
+
+                    ' Restore the original dimensions and position
+                    s.SetSize originalWidth, originalHeight
+                    s.SetPosition xPos, yPos
+                End If
+            End If
+        End If
+        On Error GoTo 0 ' Turn off error handling after bypassing non-bitmap objects
+    Next s
+End Sub
