@@ -1,0 +1,22 @@
+Sub DeleteEmptyLayers()
+    Dim doc As Document
+    Set doc = ActiveDocument
+    
+    Dim p As Page
+    Dim lyr As Layer
+    Dim i As Integer
+    
+    ' Iterate through each page in the document
+    For Each p In doc.Pages
+        ' Access all layers on the page
+        For i = p.Layers.Count To 1 Step -1
+            Set lyr = p.Layers(i)
+            ' Check if the layer is empty (no shapes) and is not a master layer or a guides layer
+            If lyr.Shapes.Count = 0 And Not lyr.IsSpecialLayer Then
+                lyr.Delete
+            End If
+        Next i
+    Next p
+    
+    MsgBox "All empty layers have been deleted."
+End Sub
