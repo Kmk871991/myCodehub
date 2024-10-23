@@ -1,0 +1,113 @@
+Sub CopyAndPasteToPageRangeAtXYFlexible()
+    Dim sr As ShapeRange
+    Dim s As Shape
+    Dim xPosMM As Double
+    Dim yPosMM As Double
+    Dim xPos As Double
+    Dim yPos As Double
+    Dim i As Integer
+    Dim currentPage As page
+    Dim totalPages As Integer
+    Dim pageNumbers As String
+    Dim pageArray() As String
+    Dim pageNum As Integer
+    Dim originalLayer As layer
+    Dim j As Integer
+    Dim rangeParts() As String
+    Dim startPage As Integer
+    Dim endPage As Integer
+    Dim pagesToPaste As Collection
+    Dim pageIndex As Variant ' Use Variant for the For Each loop
+    
+    Set pagesToPaste = New Collection
+    
+    ' Check if there is a selection
+    If ActiveSelectionRange.Count = 0 Then
+        MsgBox "Please select an object."
+        Exit Sub
+    End If
+
+    ' Store the selected object
+    Set sr = ActiveSelectionRange
+    Set s = sr(1)
+    
+    ' Get the total number of pages in the document
+    totalPages = ActiveDocument.Pages.Count
+    Set originalLayer = s.layer
+    
+    ' Ask the user to input X and Y coordinates in millimeters
+    xPosMM = InputBox("Enter the X position (in mm) where the object should be placed:", "X Position", s.PositionX * 25.4)
+    yPosMM = InputBox("Enter the Y position (in mm) where the object should be placed:", "Y Position", s.PositionY * 25.4)
+    
+    ' Convert mm to document units
+    xPos = ActiveDocument.ToUnits(xPosMM, cdrMillimeter)
+    yPos = ActiveDocument.ToUnits(yPosMM, cdrMillimeter)
+    
+    ' Ask the user to input page numbers and ranges (e.g., "1,3,5-7")
+    pageNumbers = InputBox("Enter the page numbers or ranges (e.g., 1,3,5-7):", "Select Pages")
+    
+    ' Split the input into an array of page numbers/ranges
+    If pageNumbers = "" Then
+        MsgBox "No pages selected."
+        Exit Sub
+    End If
+    
+    pageArray = Split(pageNumbers, ",")
+    
+    ' Parse each page or range and add to the pagesToPaste collection
+    For i = LBound(pageArray) To UBound(pageArray)
+        pageArray(i) = Trim(pageArray(i)) ' Trim any spaces
+
+        If InStr(pageArray(i), "-") > 0 Then
+            ' Handle ranges like 1-4
+            rangeParts = Split(pageArray(i), "-")
+            startPage = Val(Trim(rangeParts(0)))
+            endPage = Val(Trim(rangeParts(1)))
+            
+            ' Validate the range and add pages to the collection
+            If startPage > 0 And endPage <= totalPages And startPage <= endPage Then
+                For j = startPage To endPage
+                    On Error Resume Next ' Prevent errors if pages are duplicated
+                    pagesToPaste.Add j
+                    On Error GoTo 0
+                Next j
+            Else
+                MsgBox "Invalid page range: " & pageArray(i)
+            End If
+        Else
+            ' Handle individual pages like 1, 2, 3
+            pageNum = Val(pageArray(i))
+            If pageNum > 0 And pageNum <= totalPages Then
+                On Error Resume Next
+                pagesToPaste.Add pageNum
+                On Error GoTo 0
+            Else
+                MsgBox "Invalid page number: " & pageArray(i)
+            End If
+        End If
+    Next i
+    
+    ' Copy the selected object to the clipboard
+    sr.Copy
+
+    ' Loop through the pages in the pagesToPaste collection
+    For Each pageIndex In pagesToPaste
+        Set currentPage = ActiveDocument.Pages(CInt(pageIndex)) ' Convert Variant to Integer
+        
+        ' Activate the current page
+        currentPage.Activate
+        
+        ' Paste the object
+        ActiveLayer.Paste
+        
+        ' Set the position of the pasted object
+        Set s = ActiveSelectionRange(1)
+        s.SetPosition xPos, yPos
+    Next pageIndex
+    
+    ' Return to the original page
+    originalLayer.page.Activate
+
+    MsgBox "Object copied to the selected pages at the specified X and Y positions."
+End Sub
+
