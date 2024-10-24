@@ -1,0 +1,36 @@
+Dim autoSaveStopped As Boolean
+Dim startTime As Single
+
+Sub StartAutoSave()
+    autoSaveStopped = False
+    
+    ' Notify that auto-save has started
+    Application.StatusBar = "Auto-save started at " & Time()
+    
+    ' Record the start time
+    startTime = Timer
+    
+    Do While Not autoSaveStopped
+        ' Check if 5 minutes have passed (300 seconds)
+        If Timer - startTime >= 300 Then
+            ActiveDocument.Save ' Save the active document
+            
+            ' Notify the user in the status bar after each save
+            Application.StatusBar = "Document saved automatically at " & Time()
+            
+            ' Reset the start time after save
+            startTime = Timer
+        End If
+        
+        ' Ensure the status bar updates properly
+        DoEvents ' Allows other system events to process, including UI updates
+    Loop
+End Sub
+
+Sub StopAutoSaveProcess()
+    autoSaveStopped = True
+    
+    ' Notify that auto-save has stopped
+    Application.StatusBar = "Auto-save stopped at " & Time()
+End Sub
+
