@@ -33,3 +33,46 @@ Sub CreateBoxAroundObjectWithExtraSpace()
     sr.AddToSelection
     sr.Group
 End Sub
+
+
+Sub CreateBoxAroundObjectWithReducedSpace()
+    Dim sr As ShapeRange
+    Dim newBox As Shape
+    Dim newWidth As Double
+    Dim newHeight As Double
+    Dim reduceWidth As Double
+    Dim reduceHeight As Double
+
+    ' Define the reduction size in millimeters
+    reduceWidth = 8    ' Subtract 8mm from the width
+    reduceHeight = 16  ' Subtract 16mm from the height
+
+    ' Ensure document units are in millimeters
+    ActiveDocument.Unit = cdrMillimeter
+    
+    ' Get the selected shapes
+    Set sr = ActiveSelectionRange
+    
+    ' Check if there is at least one shape selected
+    If sr.Count = 0 Then
+        MsgBox "Please select an object."
+        Exit Sub
+    End If
+    
+    ' Calculate new width and height by subtracting the space
+    newWidth = sr.SizeWidth - reduceWidth
+    newHeight = sr.SizeHeight - reduceHeight
+    
+    ' Ensure that the new width and height are not negative
+    If newWidth <= 0 Or newHeight <= 0 Then
+        MsgBox "The reduction is too large for the selected object."
+        Exit Sub
+    End If
+    
+    ' Create the box around the selected shape
+    Set newBox = ActiveLayer.CreateRectangle2(sr.LeftX + (reduceWidth / 2), sr.BottomY + (reduceHeight / 2), newWidth, newHeight)
+    
+    ' Optionally, you can group the box and object together
+    sr.AddToSelection
+    sr.Group
+End Sub
