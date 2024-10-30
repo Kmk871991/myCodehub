@@ -1,0 +1,125 @@
+Sub CreateFlexBoxLayoutWithinMargins()
+    ' Set up basic variables for layout
+    Dim docWidth As Double, docHeight As Double
+    Dim rows As Integer, columns As Integer
+    Dim gutterWidth As Double, gutterHeight As Double
+    Dim marginTop As Double, marginBottom As Double
+    Dim marginLeft As Double, marginRight As Double
+    Dim padding As Double
+    Dim boxWidth As Double, boxHeight As Double
+    Dim contentWidth As Double, contentHeight As Double
+    Dim xPos As Double, yPos As Double
+    Dim i As Integer, j As Integer
+    Dim newBox As Shape, contentBox As Shape
+    Dim groupedShape As Shape
+
+    ' Get the document size in millimeters
+    docWidth = ActiveDocument.ActivePage.SizeWidth * 25.4 ' Convert inches to mm
+    docHeight = ActiveDocument.ActivePage.SizeHeight * 25.4 ' Convert inches to mm
+
+    ' Prompt user for number of rows and columns
+    rows = InputBox("Enter the number of rows:", "Flexbox Rows", 3)
+    columns = InputBox("Enter the number of columns:", "Flexbox Columns", 3)
+
+    ' Prompt user for gutter width and height in mm
+    gutterWidth = InputBox("Enter the gutter width in mm:", "Gutter Width", 10)
+    gutterHeight = InputBox("Enter the gutter height in mm:", "Gutter Height", 10)
+
+    ' Prompt user for margins in mm
+    marginTop = InputBox("Enter the top margin in mm:", "Top Margin", 10)
+    marginBottom = InputBox("Enter the bottom margin in mm:", "Bottom Margin", 10)
+    marginLeft = InputBox("Enter the left margin in mm:", "Left Margin", 10)
+    marginRight = InputBox("Enter the right margin in mm:", "Right Margin", 10)
+
+    ' Prompt user for padding in mm
+    padding = InputBox("Enter the padding inside each box in mm:", "Box Padding", 5)
+
+    ' Calculate available width and height after margins
+    docWidth = docWidth - marginLeft - marginRight
+    docHeight = docHeight - marginTop - marginBottom
+
+    ' Calculate box dimensions in mm based on document size, rows, columns, and gutters
+    If columns > 1 Then
+        boxWidth = (docWidth - (columns - 1) * gutterWidth) / columns
+    Else
+        boxWidth = docWidth
+    End If
+
+    If rows > 1 Then
+        boxHeight = (docHeight - (rows - 1) * gutterHeight) / rows
+    Else
+        boxHeight = docHeight
+    End If
+
+    ' Check for valid box dimensions
+    If boxWidth <= 0 Or boxHeight <= 0 Then
+        MsgBox "Error: The calculated box width or height is zero or negative. Please adjust the rows, columns, gutters, or margins.", vbCritical
+        Exit Sub
+    End If
+
+    ' Adjust content box dimensions for padding
+    contentWidth = boxWidth - 2 * padding
+    contentHeight = boxHeight - 2 * padding
+
+    ' Ensure content dimensions are positive
+    If contentWidth <= 0 Or contentHeight <= 0 Then
+        MsgBox "Error: The calculated content width or height is zero or negative due to padding. Please adjust the padding or box dimensions.", vbCritical
+        Exit Sub
+    End If
+
+    ' Convert all dimensions back to inches for CorelDRAW's internal use
+    marginTop = marginTop / 25.4
+    marginLeft = marginLeft / 25.4
+    boxWidth = boxWidth / 25.4
+    boxHeight = boxHeight / 25.4
+    contentWidth = contentWidth / 25.4
+    contentHeight = contentHeight / 25.4
+    gutterWidth = gutterWidth / 25.4
+    gutterHeight = gutterHeight / 25.4
+
+    ' Set starting positions within the margins
+    xPos = marginLeft
+    yPos = ActiveDocument.ActivePage.SizeHeight - marginTop
+
+    ' Clear any previous selection
+    ActiveDocument.ClearSelection
+
+    ' Loop through rows and columns to place boxes, staying within the margins
+    For i = 0 To rows - 1
+        For j = 0 To columns - 1
+            ' Calculate the position for each box within the margins
+            Dim currentX As Double, currentY As Double
+            currentX = xPos + j * (boxWidth + gutterWidth)
+            currentY = yPos - i * (boxHeight + gutterHeight)
+
+            ' Create the outer box
+            Set newBox = ActiveLayer.CreateRectangle2(currentX + boxWidth / 2, currentY - boxHeight / 2, boxWidth, boxHeight)
+            newBox.Outline.SetNoOutline
+            newBox.Fill.UniformColor.RGBAssign 173, 216, 230
+            newBox.CreateSelection ' Add to selection
+
+            ' Create the inner content box with reduced dimensions
+            Set contentBox = ActiveLayer.CreateRectangle2(currentX + boxWidth / 2, currentY - boxHeight / 2, contentWidth, contentHeight)
+            contentBox.Outline.SetNoOutline
+            contentBox.Fill.UniformColor.RGBAssign 255, 255, 255
+            contentBox.AlignToShape cdrAlignHCenter, newBox
+            contentBox.AlignToShape cdrAlignVCenter, newBox
+            contentBox.CreateSelection ' Add to selection
+        Next j
+    Next i
+
+    ' Group all selected shapes
+    Set groupedShape = ActiveSelection.Group
+
+    ' Center-align the group to the page
+    groupedShape.AlignToPageCenter cdrAlignHCenter
+    groupedShape.AlignToPageCenter cdrAlignVCenter
+
+    ' Ungroup after aligning to page center
+    groupedShape.UngroupAll
+
+    ' Inform user
+    MsgBox "Flexbox layout created within margins, centered, and ungrouped."
+
+End Sub
+
