@@ -1,11 +1,19 @@
 Dim autoSaveStopped As Boolean
 Dim startTime As Single
+Dim logFilePath As String
 
 Sub StartAutoSave()
     autoSaveStopped = False
     
+    ' Specify the path for the log file
+    logFilePath = "C:\Users\Karthik\Documents\Corel\Corel Content\Autosave Logs\autosave_log.txt" ' Change this path as needed
+    
     ' Notify that auto-save has started
     Application.StatusBar = "Auto-save started at " & Time()
+    MsgBox "Auto-save started at " & Time()
+    
+    ' Log the start time
+    WriteToLogFile "Auto-save started at " & Time()
     
     ' Record the start time
     startTime = Timer
@@ -15,8 +23,14 @@ Sub StartAutoSave()
         If Timer - startTime >= 300 Then
             ActiveDocument.Save ' Save the active document
             
-            ' Notify the user in the status bar after each save
-            Application.StatusBar = "Document saved automatically at " & Time()
+            ' Notify the user with a message box and log the event
+            Dim saveMessage As String
+            saveMessage = "Document saved automatically at " & Time()
+            MsgBox saveMessage
+            Application.StatusBar = saveMessage
+            
+            ' Write to the log file
+            WriteToLogFile saveMessage
             
             ' Reset the start time after save
             startTime = Timer
@@ -31,6 +45,23 @@ Sub StopAutoSaveProcess()
     autoSaveStopped = True
     
     ' Notify that auto-save has stopped
-    Application.StatusBar = "Auto-save stopped at " & Time()
+    Dim stopMessage As String
+    stopMessage = "Auto-save stopped at " & Time()
+    Application.StatusBar = stopMessage
+    MsgBox stopMessage
+    
+    ' Log the stop time
+    WriteToLogFile stopMessage
+End Sub
+
+Sub WriteToLogFile(message As String)
+    ' Append the message to the log file
+    Dim fileNumber As Integer
+    fileNumber = FreeFile ' Get the next available file number
+    
+    ' Open the file for appending
+    Open logFilePath For Append As #fileNumber
+        Print #fileNumber, message ' Write the message to the log file
+    Close #fileNumber ' Close the file
 End Sub
 
