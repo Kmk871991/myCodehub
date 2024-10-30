@@ -1,0 +1,41 @@
+# Set Power Plan to High Performance
+Write-Host "Setting power plan to High Performance..."
+powercfg /setactive SCHEME_MAX
+
+# Disk Cleanup - Remove temporary files
+Write-Host "Running Disk Cleanup..."
+Start-Process -FilePath "cleanmgr" -ArgumentList "/sageset:1"
+Start-Process -FilePath "cleanmgr" -ArgumentList "/sagerun:1"
+
+# Optimize SSD (TRIM)
+Write-Host "Optimizing SSD with TRIM..."
+Optimize-Volume -DriveLetter C -ReTrim -Verbose
+
+# Clear Temporary Files
+Write-Host "Clearing Temporary Files..."
+Remove-Item -Path "$env:TEMP\*" -Recurse -Force
+Remove-Item -Path "C:\Windows\Temp\*" -Recurse -Force
+Write-Host "Temporary files cleared."
+
+# Disable Unnecessary Startup Programs
+Write-Host "Disabling unnecessary startup programs..."
+Get-CimInstance -ClassName Win32_StartupCommand | 
+    Where-Object { $_.Name -notmatch "Security|Microsoft" } |
+    ForEach-Object { Disable-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name $_.Name -Force }
+
+# Adjust Visual Effects for Performance
+Write-Host "Adjusting visual effects for best performance..."
+$PerformanceSettings = New-Object -ComObject "System.Shell"
+$PerformanceSettings.RegWrite("HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects\VisualFXSetting", 2, "REG_DWORD")
+
+# Disable Unnecessary Services (e.g., Xbox services, if not needed)
+Write-Host "Disabling unnecessary services..."
+$services = @("XboxGipSvc", "XboxNetApiSvc", "DiagTrack", "SysMain") # Add more as needed
+foreach ($service in $services) {
+    Get-Service -Name $service -ErrorAction SilentlyContinue | ForEach-Object { 
+        Stop-Service -Name $_.Name -Force -ErrorAction SilentlyContinue 
+        Set-Service -Name $_.Name -StartupType Disabled 
+    }
+}
+
+Write-Host "System optimization script completed. Please restart your computer to apply all changes."
