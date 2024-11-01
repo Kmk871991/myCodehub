@@ -1,0 +1,21 @@
+Sub ResizeToNearestMultipleOfFour()
+    Dim shape As Shape
+    Dim newWidth As Double
+    Dim newHeight As Double
+
+    ' Check if there is an active selection
+    If ActiveSelection.Shapes.Count = 0 Then
+        MsgBox "Please select a shape to resize."
+        Exit Sub
+    End If
+
+    ' Loop through each selected shape
+    For Each shape In ActiveSelection.Shapes
+        ' Calculate new width and height to the nearest multiple of 4
+        newWidth = Round(shape.SizeWidth / 4) * 4
+        newHeight = Round(shape.SizeHeight / 4) * 4
+
+        ' Resize the shape
+        shape.SetSize newWidth, newHeight
+    Next shape
+End Sub
