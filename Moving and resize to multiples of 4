@@ -1,0 +1,31 @@
+Sub ResizeAndAlignToNearestMultipleOfFour()
+    Dim shape As shape
+    Dim newWidth As Double
+    Dim newHeight As Double
+    Dim newX As Double
+    Dim newY As Double
+
+    ' Check if there is an active selection
+    If ActiveSelection.Shapes.Count = 0 Then
+        MsgBox "Please select a shape to resize and align."
+        Exit Sub
+    End If
+
+    ' Loop through each selected shape
+    For Each shape In ActiveSelection.Shapes
+        ' Calculate new width and height to the nearest multiple of 4
+        newWidth = Round(shape.SizeWidth / 4) * 4
+        newHeight = Round(shape.SizeHeight / 4) * 4
+        
+        ' Calculate new X and Y position to the nearest multiple of 4
+        newX = Round(shape.PositionX / 4) * 4
+        newY = Round(shape.PositionY / 4) * 4
+
+        ' Resize the shape
+        shape.SetSize newWidth, newHeight
+        
+        ' Move the shape to the new position
+        shape.SetPosition newX, newY
+    Next shape
+End Sub
+
