@@ -1,21 +1,40 @@
-Sub ResizeToNearestMultipleOfFour()
-    Dim shape As Shape
+Sub ResizeWidthHeightToLowerMultipleOf4InMM()
+    Dim sr As ShapeRange
+    Dim shape As shape
     Dim newWidth As Double
     Dim newHeight As Double
-
-    ' Check if there is an active selection
+    Dim originalUnits As cdrUnit
+    
+    ' Store the original unit system
+    originalUnits = ActiveDocument.Unit
+    
+    ' Set units to mm for accurate resizing
+    ActiveDocument.Unit = cdrMillimeter
+    
+    ' Check if any shape is selected
     If ActiveSelection.Shapes.Count = 0 Then
-        MsgBox "Please select a shape to resize."
+        MsgBox "Please select an object to resize.", vbInformation
         Exit Sub
     End If
 
-    ' Loop through each selected shape
-    For Each shape In ActiveSelection.Shapes
-        ' Calculate new width and height to the nearest multiple of 4
-        newWidth = Round(shape.SizeWidth / 4) * 4
-        newHeight = Round(shape.SizeHeight / 4) * 4
+    ' Set the selected shapes range
+    Set sr = ActiveSelectionRange
 
-        ' Resize the shape
+    ' Iterate through each selected shape
+    For Each shape In sr
+        ' Calculate the new width and height rounded down to nearest multiple of 4 mm
+        newWidth = Int(shape.SizeWidth / 4) * 4
+        newHeight = Int(shape.SizeHeight / 4) * 4
+        
+        ' Apply the new width and height
+        On Error Resume Next ' Skip unsupported properties
         shape.SetSize newWidth, newHeight
+        On Error GoTo 0 ' Reset error handling
     Next shape
+
+    ' Restore the original unit system
+    ActiveDocument.Unit = originalUnits
+
+    MsgBox "Selected objects have been resized to the nearest lower multiple of 4 mm for both width and height.", vbInformation
 End Sub
+
