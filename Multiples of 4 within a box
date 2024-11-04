@@ -1,0 +1,62 @@
+Sub ResizeToFitBoundingBoxWithMultipleOf4()
+    Dim sr As ShapeRange
+    Dim shape As Shape
+    Dim maxWidth As Double
+    Dim maxHeight As Double
+    Dim newWidth As Double
+    Dim newHeight As Double
+    Dim aspectRatio As Double
+    Dim keepAspectRatio As VbMsgBoxResult
+    Dim originalUnits As cdrUnit
+
+    ' Prompt the user for maximum width and height in mm
+    maxWidth = Val(InputBox("Enter the maximum width in mm:", "Bounding Box Width"))
+    maxHeight = Val(InputBox("Enter the maximum height in mm:", "Bounding Box Height"))
+    
+    ' Ask the user whether to keep the aspect ratio
+    keepAspectRatio = MsgBox("Do you want to keep the aspect ratio?", vbYesNo + vbQuestion, "Aspect Ratio Option")
+
+    ' Store the original unit system and set units to mm
+    originalUnits = ActiveDocument.Unit
+    ActiveDocument.Unit = cdrMillimeter
+
+    ' Check if any shape is selected
+    If ActiveSelection.Shapes.Count = 0 Then
+        MsgBox "Please select an object to resize.", vbInformation
+        Exit Sub
+    End If
+
+    ' Set the selected shapes range
+    Set sr = ActiveSelectionRange
+
+    ' Iterate through each selected shape
+    For Each shape In sr
+        ' Calculate the aspect ratio
+        aspectRatio = shape.SizeWidth / shape.SizeHeight
+        
+        If keepAspectRatio = vbYes Then
+            ' Resize proportionally to fit within the specified box
+            If shape.SizeWidth / maxWidth > shape.SizeHeight / maxHeight Then
+                ' Width is the limiting factor
+                newWidth = Int(maxWidth / 4) * 4
+                newHeight = newWidth / aspectRatio
+            Else
+                ' Height is the limiting factor
+                newHeight = Int(maxHeight / 4) * 4
+                newWidth = newHeight * aspectRatio
+            End If
+        Else
+            ' Resize independently without keeping aspect ratio
+            newWidth = Int(Application.Min(shape.SizeWidth, maxWidth) / 4) * 4
+            newHeight = Int(Application.Min(shape.SizeHeight, maxHeight) / 4) * 4
+        End If
+
+        ' Apply the new width and height
+        shape.SetSize newWidth, newHeight
+    Next shape
+
+    ' Restore the original unit system
+    ActiveDocument.Unit = originalUnits
+
+    MsgBox "Selected objects have been resized to fit within the specified box, using the nearest multiple of 4 mm.", vbInformation
+End Sub
