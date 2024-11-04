@@ -1,9 +1,18 @@
-Sub ResizeWidthHeightToLowerMultipleOf4InMM()
+Sub ResizeToLowerMultipleOf4WithAspectRatioAndDimensionOption()
     Dim sr As ShapeRange
     Dim shape As shape
     Dim newWidth As Double
     Dim newHeight As Double
+    Dim aspectRatio As Double
     Dim originalUnits As cdrUnit
+    Dim keepAspectRatio As VbMsgBoxResult
+    Dim baseDimension As VbMsgBoxResult
+    
+    ' Ask the user whether to keep the aspect ratio
+    keepAspectRatio = MsgBox("Do you want to keep the aspect ratio?", vbYesNo + vbQuestion, "Aspect Ratio Option")
+    
+    ' Ask the user whether to base the multiple of 4 on width or height
+    baseDimension = MsgBox("Do you want the width to be the multiple of 4? (Select 'No' for height)", vbYesNo + vbQuestion, "Dimension Choice")
     
     ' Store the original unit system
     originalUnits = ActiveDocument.Unit
@@ -22,19 +31,39 @@ Sub ResizeWidthHeightToLowerMultipleOf4InMM()
 
     ' Iterate through each selected shape
     For Each shape In sr
-        ' Calculate the new width and height rounded down to nearest multiple of 4 mm
-        newWidth = Int(shape.SizeWidth / 4) * 4
-        newHeight = Int(shape.SizeHeight / 4) * 4
+        ' Calculate the aspect ratio
+        aspectRatio = shape.SizeWidth / shape.SizeHeight
         
+        ' Determine new dimensions based on user choice
+        If baseDimension = vbYes Then
+            ' Set width to nearest lower multiple of 4
+            newWidth = Int(shape.SizeWidth / 4) * 4
+            If keepAspectRatio = vbYes Then
+                ' Maintain aspect ratio
+                newHeight = newWidth / aspectRatio
+            Else
+                ' Resize height independently
+                newHeight = Int(shape.SizeHeight / 4) * 4
+            End If
+        Else
+            ' Set height to nearest lower multiple of 4
+            newHeight = Int(shape.SizeHeight / 4) * 4
+            If keepAspectRatio = vbYes Then
+                ' Maintain aspect ratio
+                newWidth = newHeight * aspectRatio
+            Else
+                ' Resize width independently
+                newWidth = Int(shape.SizeWidth / 4) * 4
+            End If
+        End If
+
         ' Apply the new width and height
-        On Error Resume Next ' Skip unsupported properties
         shape.SetSize newWidth, newHeight
-        On Error GoTo 0 ' Reset error handling
     Next shape
 
     ' Restore the original unit system
     ActiveDocument.Unit = originalUnits
 
-    MsgBox "Selected objects have been resized to the nearest lower multiple of 4 mm for both width and height.", vbInformation
+    MsgBox "Selected objects have been resized to the nearest lower multiple of 4 mm based on your choices.", vbInformation
 End Sub
 
