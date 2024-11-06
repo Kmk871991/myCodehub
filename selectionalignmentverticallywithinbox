@@ -1,0 +1,55 @@
+Sub AlignObjectsWithinSelectedBoxAcrossAllPages()
+    ' Ensure only one shape (the box) is selected
+    If ActiveSelection.Shapes.Count <> 1 Then
+        MsgBox "Please select a single box to define the alignment area.", vbExclamation
+        Exit Sub
+    End If
+
+    ' Get the coordinates of the selected box
+    Dim selectionBox As shape
+    Set selectionBox = ActiveSelection.Shapes(1)
+    
+    Dim topLeftX As Double, topLeftY As Double
+    Dim bottomRightX As Double, bottomRightY As Double
+    
+    topLeftX = selectionBox.LeftX
+    topLeftY = selectionBox.TopY
+    bottomRightX = selectionBox.RightX
+    bottomRightY = selectionBox.BottomY
+    
+    ' Calculate the vertical center of the box
+    Dim boxCenterY As Double
+    boxCenterY = (topLeftY + bottomRightY) / 2
+    
+    ' Loop through each page in the document
+    Dim pg As Page
+    For Each pg In ActiveDocument.Pages
+        pg.Activate  ' Set the current page as active
+        ActiveDocument.ClearSelection  ' Clear any previous selection on the page
+
+        ' Loop through each shape on the current page and select shapes within the box
+        Dim shp As shape
+        For Each shp In ActivePage.Shapes
+            ' Check if the shape is within the coordinates of the selected box
+            If shp.LeftX >= topLeftX And shp.RightX <= bottomRightX And _
+               shp.TopY <= topLeftY And shp.BottomY >= bottomRightY Then
+               
+                ' Add the shape to the selection
+                shp.CreateSelection
+            End If
+        Next shp
+        
+        ' Align the selected shapes vertically to the center of the box
+        If ActiveSelection.Shapes.Count > 0 Then
+            Dim selectedShape As shape
+            For Each selectedShape In ActiveSelection.Shapes
+                selectedShape.CenterY = boxCenterY
+            Next selectedShape
+        End If
+    Next pg
+    
+    ' Notify the user that alignment is complete
+    MsgBox "Objects within the specified box have been aligned across all pages.", vbInformation
+End Sub
+
+
