@@ -1,0 +1,41 @@
+Sub SelectObjectsWithinSelectedBox()
+    ' Ensure only one shape (the box) is selected
+    If ActiveSelection.Shapes.Count <> 1 Then
+        MsgBox "Please select a single box to define the selection area.", vbExclamation
+        Exit Sub
+    End If
+
+    ' Get the coordinates of the selected box
+    Dim selectionBox As shape
+    Set selectionBox = ActiveSelection.Shapes(1)
+    
+    Dim topLeftX As Double, topLeftY As Double
+    Dim bottomRightX As Double, bottomRightY As Double
+    
+    topLeftX = selectionBox.LeftX
+    topLeftY = selectionBox.TopY
+    bottomRightX = selectionBox.RightX
+    bottomRightY = selectionBox.BottomY
+    
+    ' Clear any previous selection
+    ActiveDocument.ClearSelection
+    
+    ' Loop through each shape on the active page and select shapes within the box
+    Dim shp As shape
+    For Each shp In ActivePage.Shapes
+        ' Check if the shape is within the coordinates of the selected box
+        If shp.LeftX >= topLeftX And shp.RightX <= bottomRightX And _
+           shp.TopY <= topLeftY And shp.BottomY >= bottomRightY Then
+           
+            ' Add the shape to the selection
+            shp.CreateSelection
+        End If
+    Next shp
+    
+    ' Feedback if no objects were selected
+    If ActiveSelection.Shapes.Count = 0 Then
+        MsgBox "No objects found within the specified box.", vbInformation
+    End If
+End Sub
+
+
