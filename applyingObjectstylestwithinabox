@@ -1,8 +1,7 @@
-Sub ApplyStyleAndCenterAlignInBoxAcrossPages()
+Sub ApplyObjectStyleAcrossAllPages()
     Dim selectionBox As Shape
     Dim topLeftX As Double, topLeftY As Double
     Dim bottomRightX As Double, bottomRightY As Double
-    Dim boxCenterX As Double, boxCenterY As Double
     Dim shp As Shape
     Dim pg As Page
     Dim foundSelectionBox As Boolean
@@ -29,13 +28,11 @@ Sub ApplyStyleAndCenterAlignInBoxAcrossPages()
         Exit Sub
     End If
 
-    ' Get the coordinates and center of the selected box
+    ' Get the coordinates of the selected box
     topLeftX = selectionBox.LeftX
     topLeftY = selectionBox.TopY
     bottomRightX = selectionBox.RightX
     bottomRightY = selectionBox.BottomY
-    boxCenterX = (topLeftX + bottomRightX) / 2
-    boxCenterY = (topLeftY + bottomRightY) / 2
     
     ' Loop through each page in the document
     For Each pg In ActiveDocument.Pages
@@ -57,12 +54,9 @@ Sub ApplyStyleAndCenterAlignInBoxAcrossPages()
         If ActiveSelection.Shapes.Count > 0 Then
             ' Replace "MyObjectStyle" with the name of the style you want to apply
             ActiveSelection.ApplyStyle "MyObjectStyle"
-            
-            ' Center align the selected objects to the box
-            ActiveSelection.AlignToPoint cdrAlignHCenter, cdrAlignVCenter, boxCenterX, boxCenterY
         End If
     Next pg
     
-    ' Notify the user that the style has been applied and alignment completed
-    MsgBox "Object style applied and objects aligned to the center of the box on all pages.", vbInformation
+    ' Notify the user that the style has been applied to all pages
+    MsgBox "Object style has been applied to all objects within the specified box area on all pages.", vbInformation
 End Sub
