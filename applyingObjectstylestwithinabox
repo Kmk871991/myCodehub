@@ -1,0 +1,68 @@
+Sub ApplyStyleAndCenterAlignInBoxAcrossPages()
+    Dim selectionBox As Shape
+    Dim topLeftX As Double, topLeftY As Double
+    Dim bottomRightX As Double, bottomRightY As Double
+    Dim boxCenterX As Double, boxCenterY As Double
+    Dim shp As Shape
+    Dim pg As Page
+    Dim foundSelectionBox As Boolean
+    foundSelectionBox = False
+    
+    ' Check if a selection box exists on the active page or master layer
+    If ActiveSelection.Shapes.Count = 1 Then
+        Set selectionBox = ActiveSelection.Shapes(1)
+        foundSelectionBox = True
+    ElseIf ActiveDocument.MasterPage.Shapes.Count > 0 Then
+        ' Look for a selection box in the master layer
+        For Each shp In ActiveDocument.MasterPage.Shapes
+            If shp.Selected Then
+                Set selectionBox = shp
+                foundSelectionBox = True
+                Exit For
+            End If
+        Next shp
+    End If
+
+    ' Exit if no selection box was found
+    If Not foundSelectionBox Then
+        MsgBox "Please select a single box on the active page or the master layer to define the selection area.", vbExclamation
+        Exit Sub
+    End If
+
+    ' Get the coordinates and center of the selected box
+    topLeftX = selectionBox.LeftX
+    topLeftY = selectionBox.TopY
+    bottomRightX = selectionBox.RightX
+    bottomRightY = selectionBox.BottomY
+    boxCenterX = (topLeftX + bottomRightX) / 2
+    boxCenterY = (topLeftY + bottomRightY) / 2
+    
+    ' Loop through each page in the document
+    For Each pg In ActiveDocument.Pages
+        pg.Activate  ' Set the current page as active
+        ActiveDocument.ClearSelection  ' Clear any previous selection on the page
+
+        ' Loop through each shape on the current page
+        For Each shp In ActivePage.Shapes
+            ' Check if the shape is within the coordinates of the selection box
+            If shp.LeftX >= topLeftX And shp.RightX <= bottomRightX And _
+               shp.TopY <= topLeftY And shp.BottomY >= bottomRightY Then
+               
+                ' Add the shape to the selection
+                shp.CreateSelection
+            End If
+        Next shp
+        
+        ' Apply an object style to the selected shapes (assuming you have a style ready)
+        If ActiveSelection.Shapes.Count > 0 Then
+            ' Replace "MyObjectStyle" with the name of the style you want to apply
+            ActiveSelection.ApplyStyle "MyObjectStyle"
+            
+            ' Center align the selected objects to the box
+            ActiveSelection.AlignToPoint cdrAlignHCenter, cdrAlignVCenter, boxCenterX, boxCenterY
+        End If
+    Next pg
+    
+    ' Notify the user that the style has been applied and alignment completed
+    MsgBox "Object style applied and objects aligned to the center of the box on all pages.", vbInformation
+End Sub
