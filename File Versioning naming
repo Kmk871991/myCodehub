@@ -1,0 +1,55 @@
+Sub AutoVersionSave()
+    Dim doc As Document
+    Dim fileName As String
+    Dim filePath As String
+    Dim version As Integer
+    Dim newFileName As String
+    Dim versionPrefix As String
+    Dim saveAsPath As String
+
+    Set doc = ActiveDocument
+    
+    ' Check if the document is open
+    If doc Is Nothing Then
+        MsgBox "No document is open."
+        Exit Sub
+    End If
+
+    fileName = doc.Name
+    
+    ' Check if the document has been saved before
+    If fileName = "Untitled.cdr" Or InStr(fileName, ".") = 0 Then
+        ' New document, start at _v2
+        newFileName = "Untitled_v2.cdr"
+    Else
+        ' Existing file, extract the base name and current version
+        filePath = Left(doc.fileName, InStrRev(doc.fileName, "\"))
+        fileName = Left(doc.Name, InStrRev(doc.Name, ".") - 1)
+        versionPrefix = "_v"
+
+        ' Use regex to find the current version number
+        Dim regex As Object
+        Set regex = CreateObject("VBScript.RegExp")
+        regex.Pattern = "_v(\d+)$"
+        regex.IgnoreCase = True
+        regex.Global = False
+
+        If regex.Test(fileName) Then
+            ' Found existing version
+            Dim matches As Object
+            Set matches = regex.Execute(fileName)
+            version = CInt(matches(0).SubMatches(0)) + 1
+            newFileName = regex.Replace(fileName, versionPrefix & version)
+        Else
+            ' No existing version found, start at _v2
+            newFileName = fileName & versionPrefix & "2"
+        End If
+    End If
+
+    ' Create the full save path with the new filename
+    saveAsPath = filePath & newFileName
+
+    ' Save the document with the new versioned filename
+    doc.SaveAs saveAsPath
+End Sub
+
