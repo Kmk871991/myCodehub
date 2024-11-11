@@ -1,0 +1,39 @@
+Sub MoveSelectedToXYTargetWithInputBox()
+    Dim targetX As Double
+    Dim targetY As Double
+    Dim shp As shape
+    Dim userInputX As String
+    Dim userInputY As String
+
+    ' Check if there is a selection
+    If ActiveSelection.Shapes.Count = 0 Then
+        MsgBox "Please select an object to move.", vbExclamation
+        Exit Sub
+    End If
+
+    ' Prompt user for X coordinate
+    userInputX = InputBox("Enter the target X coordinate (in mm):", "Target X Coordinate")
+    If IsNumeric(userInputX) Then
+        targetX = CDbl(userInputX)
+    Else
+        MsgBox "Invalid input for X coordinate. Please enter a numeric value.", vbExclamation
+        Exit Sub
+    End If
+
+    ' Prompt user for Y coordinate
+    userInputY = InputBox("Enter the target Y coordinate (in mm):", "Target Y Coordinate")
+    If IsNumeric(userInputY) Then
+        targetY = CDbl(userInputY)
+    Else
+        MsgBox "Invalid input for Y coordinate. Please enter a numeric value.", vbExclamation
+        Exit Sub
+    End If
+
+    ' Move each selected object to the specified X, Y coordinates
+    For Each shp In ActiveSelection.Shapes
+        shp.SetPosition targetX, targetY
+    Next shp
+
+    MsgBox "Selected objects moved to target X: " & targetX & " mm, Y: " & targetY & " mm", vbInformation
+End Sub
+
