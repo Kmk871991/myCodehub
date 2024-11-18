@@ -1,0 +1,71 @@
+Sub SelectAndMoveObjectsWithinSelectedBox()
+    ' Ensure only one shape (the box) is selected
+    If ActiveSelection.Shapes.Count <> 1 Then
+        MsgBox "Please select a single box to define the selection area.", vbExclamation
+        Exit Sub
+    End If
+
+    ' Get the coordinates of the selected box
+    Dim selectionBox As shape
+    Set selectionBox = ActiveSelection.Shapes(1)
+    
+    Dim topLeftX As Double, topLeftY As Double
+    Dim bottomRightX As Double, bottomRightY As Double
+    
+    topLeftX = selectionBox.LeftX
+    topLeftY = selectionBox.TopY
+    bottomRightX = selectionBox.RightX
+    bottomRightY = selectionBox.BottomY
+    
+    ' Clear any previous selection
+    ActiveDocument.ClearSelection
+    
+    ' Loop through each shape on the active page and select shapes within the box
+    Dim shp As shape
+    For Each shp In ActivePage.Shapes
+        ' Check if the shape is within the coordinates of the selected box
+        If shp.LeftX >= topLeftX And shp.RightX <= bottomRightX And _
+           shp.TopY <= topLeftY And shp.BottomY >= bottomRightY Then
+           
+            ' Add the shape to the selection
+            shp.CreateSelection
+        End If
+    Next shp
+    
+    ' Feedback if no objects were selected
+    If ActiveSelection.Shapes.Count = 0 Then
+        MsgBox "No objects found within the specified box.", vbInformation
+        Exit Sub
+    End If
+
+    ' Move selected objects to user-specified coordinates
+    Dim targetX As Double
+    Dim targetY As Double
+    Dim userInputX As String
+    Dim userInputY As String
+
+    ' Prompt user for X coordinate
+    userInputX = InputBox("Enter the target X coordinate (in mm):", "Target X Coordinate")
+    If IsNumeric(userInputX) Then
+        targetX = CDbl(userInputX)
+    Else
+        MsgBox "Invalid input for X coordinate. Please enter a numeric value.", vbExclamation
+        Exit Sub
+    End If
+
+    ' Prompt user for Y coordinate
+    userInputY = InputBox("Enter the target Y coordinate (in mm):", "Target Y Coordinate")
+    If IsNumeric(userInputY) Then
+        targetY = CDbl(userInputY)
+    Else
+        MsgBox "Invalid input for Y coordinate. Please enter a numeric value.", vbExclamation
+        Exit Sub
+    End If
+
+    ' Move each selected object to the specified X, Y coordinates
+    For Each shp In ActiveSelection.Shapes
+        shp.SetPosition targetX, targetY
+    Next shp
+
+    MsgBox "Selected objects moved to target X: " & targetX & " mm, Y: " & targetY & " mm", vbInformation
+End Sub
