@@ -12,7 +12,7 @@ Sub SelectAndMoveObjectsWithinSelectedBox()
     Dim topLeftX As Double, topLeftY As Double
     Dim bottomRightX As Double, bottomRightY As Double
     
-    topLeftX = selectionBox.LeftX
+    topLeftX = selectionBox.leftX
     topLeftY = selectionBox.TopY
     bottomRightX = selectionBox.RightX
     bottomRightY = selectionBox.BottomY
@@ -24,7 +24,7 @@ Sub SelectAndMoveObjectsWithinSelectedBox()
     Dim shp As shape
     For Each shp In ActivePage.Shapes
         ' Check if the shape is within the coordinates of the selected box
-        If shp.LeftX >= topLeftX And shp.RightX <= bottomRightX And _
+        If shp.leftX >= topLeftX And shp.RightX <= bottomRightX And _
            shp.TopY <= topLeftY And shp.BottomY >= bottomRightY Then
            
             ' Add the shape to the selection
@@ -71,7 +71,7 @@ Sub SelectAndMoveObjectsWithinSelectedBox()
 End Sub
 
 
-Sub SelectAndMoveObjectsWithinSelectedBoxAcrossPages()
+Sub SelectAndMoveObjectsWithinSelectedBoxPageByPage()
     ' Ensure only one shape (the box) is selected
     If ActiveSelection.Shapes.Count <> 1 Then
         MsgBox "Please select a single box to define the selection area.", vbExclamation
@@ -79,49 +79,18 @@ Sub SelectAndMoveObjectsWithinSelectedBoxAcrossPages()
     End If
 
     ' Get the coordinates of the selected box
-    Dim selectionBox As Shape
+    Dim selectionBox As shape
     Set selectionBox = ActiveSelection.Shapes(1)
     
     Dim topLeftX As Double, topLeftY As Double
     Dim bottomRightX As Double, bottomRightY As Double
     
-    topLeftX = selectionBox.LeftX
+    topLeftX = selectionBox.leftX
     topLeftY = selectionBox.TopY
     bottomRightX = selectionBox.RightX
     bottomRightY = selectionBox.BottomY
-    
-    ' Clear any previous selection
-    ActiveDocument.ClearSelection
 
-    ' Loop through each page in the document
-    Dim page As Page
-    Dim shp As Shape
-    Dim selectedShapesCount As Long
-    selectedShapesCount = 0
-
-    For Each page In ActiveDocument.Pages
-        page.Activate ' Activate the current page to work on it
-
-        ' Loop through each shape on the current page and select shapes within the box
-        For Each shp In page.Shapes
-            ' Check if the shape is within the coordinates of the selected box
-            If shp.LeftX >= topLeftX And shp.RightX <= bottomRightX And _
-               shp.TopY <= topLeftY And shp.BottomY >= bottomRightY Then
-               
-                ' Add the shape to the selection
-                shp.CreateSelection
-                selectedShapesCount = selectedShapesCount + 1
-            End If
-        Next shp
-    Next page
-    
-    ' Feedback if no objects were selected
-    If selectedShapesCount = 0 Then
-        MsgBox "No objects found within the specified box on any page.", vbInformation
-        Exit Sub
-    End If
-
-    ' Move selected objects to user-specified coordinates
+    ' Prompt user for target X and Y coordinates
     Dim targetX As Double
     Dim targetY As Double
     Dim userInputX As String
@@ -145,10 +114,53 @@ Sub SelectAndMoveObjectsWithinSelectedBoxAcrossPages()
         Exit Sub
     End If
 
-    ' Move each selected object to the specified X, Y coordinates
-    For Each shp In ActiveSelection.Shapes
-        shp.SetPosition targetX, targetY
-    Next shp
+    ' Loop through each page in the document
+    Dim page As page
+    Dim shp As shape
+    Dim shapesToSelect As Collection
+    Dim totalSelectedShapes As Long
+    totalSelectedShapes = 0
 
-    MsgBox "Selected objects moved to target X: " & targetX & " mm, Y: " & targetY & " mm across all pages.", vbInformation
+    For Each page In ActiveDocument.Pages
+        page.Activate ' Activate the current page to work on it
+        
+        ' Collection to hold shapes to select
+        Set shapesToSelect = New Collection
+        
+        ' Loop through each shape on the current page
+        For Each shp In page.Shapes
+            ' Check if the shape is within the coordinates of the selected box
+            If shp.leftX >= topLeftX And shp.RightX <= bottomRightX And _
+               shp.TopY <= topLeftY And shp.BottomY >= bottomRightY Then
+               
+                ' Add the shape to the collection
+                shapesToSelect.Add shp
+            End If
+        Next shp
+        
+        ' Add shapes in the collection to the selection
+        ActiveDocument.ClearSelection ' Clear previous selection
+        For Each shp In shapesToSelect
+            shp.AddToSelection
+        Next shp
+
+        ' Move selected shapes to target coordinates if any were selected
+        If ActiveSelection.Shapes.Count > 0 Then
+            For Each shp In ActiveSelection.Shapes
+                shp.SetPosition targetX, targetY
+            Next shp
+            totalSelectedShapes = totalSelectedShapes + ActiveSelection.Shapes.Count
+        End If
+    Next page
+
+    ' Final notification after processing all pages
+    If totalSelectedShapes > 0 Then
+        MsgBox "Successfully moved " & totalSelectedShapes & " objects across all pages to X: " & targetX & " mm, Y: " & targetY & " mm.", vbInformation
+    Else
+        MsgBox "No objects were found within the specified box on any page.", vbInformation
+    End If
 End Sub
+
+
+
+
