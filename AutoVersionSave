@@ -1,0 +1,103 @@
+Sub AutoVersionSave()
+    Dim doc As Document
+    Dim fileName As String, baseName As String, extension As String
+    Dim major As Integer, minor As Integer, patch As Integer
+    Dim newVersion As String
+
+    ' Get the active document and its name
+    Set doc = ActiveDocument
+    fileName = doc.fileName
+
+    ' Check if file name contains versioning (_X.Y.Z)
+    If fileName Like "*_*.*.*" Then
+        ' Extract the base name, version, and extension
+        baseName = Left(fileName, InStrRev(fileName, "_") - 1)
+        extension = Right(fileName, Len(fileName) - InStrRev(fileName, "."))
+        
+        Dim versionPart As String
+        versionPart = Mid(fileName, InStrRev(fileName, "_") + 1, InStrRev(fileName, ".") - InStrRev(fileName, "_") - 1)
+        major = Split(versionPart, ".")(0)
+        minor = Split(versionPart, ".")(1)
+        patch = Split(versionPart, ".")(2)
+
+        ' Increment version (default: PATCH)
+        patch = patch + 1 ' Change to major or minor if needed
+
+        ' Create new version string
+        newVersion = baseName & "_" & major & "." & minor & "." & patch & "." & extension
+    Else
+        ' No version detected, start at 1.0.0
+        baseName = Left(fileName, InStrRev(fileName, ".") - 1)
+        extension = Right(fileName, Len(fileName) - InStrRev(fileName, "."))
+        newVersion = baseName & "_1.0.0." & extension
+    End If
+
+    ' Save as new file
+    doc.SaveAs newVersion
+End Sub
+
+
+
+Sub AutoVersionSaveWithDetection()
+    Dim doc As Document
+    Dim fileName As String, baseName As String, extension As String
+    Dim major As Integer, minor As Integer, patch As Integer
+    Dim newVersion As String
+    Dim changesDetected As String
+
+    ' Get the active document and its name
+    Set doc = ActiveDocument
+    fileName = doc.fileName
+
+    ' Detect changes (pseudo-logic for illustration)
+    changesDetected = DetectChanges(doc) ' Custom function to detect change type
+
+    ' Extract version info from the file name
+    If fileName Like "*_*.*.*" Then
+        baseName = Left(fileName, InStrRev(fileName, "_") - 1)
+        extension = Right(fileName, Len(fileName) - InStrRev(fileName, "."))
+        
+        Dim versionPart As String
+        versionPart = Mid(fileName, InStrRev(fileName, "_") + 1, InStrRev(fileName, ".") - InStrRev(fileName, "_") - 1)
+        major = Split(versionPart, ".")(0)
+        minor = Split(versionPart, ".")(1)
+        patch = Split(versionPart, ".")(2)
+
+        ' Increment version based on detected changes
+        Select Case changesDetected
+            Case "MAJOR"
+                major = major + 1
+                minor = 0
+                patch = 0
+            Case "MINOR"
+                minor = minor + 1
+                patch = 0
+            Case "PATCH"
+                patch = patch + 1
+        End Select
+    Else
+        ' No version detected, start at 1.0.0
+        baseName = Left(fileName, InStrRev(fileName, ".") - 1)
+        extension = Right(fileName, Len(fileName) - InStrRev(fileName, "."))
+        major = 1: minor = 0: patch = 0
+    End If
+
+    ' Create new version string
+    newVersion = baseName & "_" & major & "." & minor & "." & patch & "." & extension
+
+    ' Save as new file
+    doc.SaveAs newVersion
+End Sub
+
+' Example function to detect changes
+Function DetectChanges(doc As Document) As String
+    ' Pseudo-logic: Check pages, objects, layers
+    If doc.Pages.Count > 1 Then
+        DetectChanges = "MAJOR"
+    ElseIf doc.ActiveLayer.Shapes.Count > 10 Then
+        DetectChanges = "MINOR"
+    Else
+        DetectChanges = "PATCH"
+    End If
+End Function
+
