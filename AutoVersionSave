@@ -101,3 +101,58 @@ Function DetectChanges(doc As Document) As String
     End If
 End Function
 
+
+
+Sub SaveWithVersion()
+    Dim filePath As String
+    Dim fileName As String
+    Dim newFileName As String
+    Dim versionParts() As String
+    Dim major As Integer, minor As Integer, patch As Integer
+
+    ' Get the current file path and name
+    filePath = ActiveDocument.FullFileName
+    If filePath = "" Then
+        MsgBox "Please save the file before running the macro.", vbExclamation, "Error"
+        Exit Sub
+    End If
+
+    ' Extract the file name without extension
+    fileName = ActiveDocument.Name
+    fileName = Left(fileName, InStrRev(fileName, ".") - 1)
+
+    ' Split the file name for versioning (assuming format: FileName_Major.Minor.Patch)
+    If InStr(fileName, "_") > 0 Then
+        versionParts = Split(fileName, "_")
+        fileName = versionParts(0)
+
+        ' Check for version numbers
+        If UBound(versionParts) = 1 And InStr(versionParts(1), ".") > 0 Then
+            Dim versionNumbers() As String
+            versionNumbers = Split(versionParts(1), ".")
+            major = CInt(versionNumbers(0))
+            minor = CInt(versionNumbers(1))
+            patch = CInt(versionNumbers(2))
+        Else
+            major = 0
+            minor = 0
+            patch = 0
+        End If
+    Else
+        major = 0
+        minor = 0
+        patch = 0
+    End If
+
+    ' Increment the patch number (default behavior)
+    patch = patch + 1
+
+    ' Create the new file name
+    newFileName = fileName & "_" & major & "." & minor & "." & patch
+
+    ' Save the file with the new name
+    ActiveDocument.SaveAs Replace(filePath, ActiveDocument.Name, newFileName & ".cdr")
+
+    MsgBox "File saved as: " & newFileName & ".cdr", vbInformation, "Version Saved"
+End Sub
+
