@@ -1,0 +1,59 @@
+Sub Distribute36ImagesToPages_Layer1Only()
+    Dim doc As Document
+    Set doc = ActiveDocument
+
+    Dim totalImages As Integer
+    totalImages = 36
+
+    ' Add pages if needed
+    If doc.Pages.Count < totalImages Then
+        doc.AddPages totalImages - doc.Pages.Count
+    End If
+
+    Dim s As shape
+    Dim shpList As Collection
+    Set shpList = New Collection
+
+    ' Collect valid images only (bitmaps or groups) from Page 1
+    For Each s In doc.Pages(1).Shapes
+        If s.Type = cdrBitmapShape Or s.Type = cdrGroupShape Then
+            shpList.Add s
+        End If
+    Next s
+
+    If shpList.Count < totalImages Then
+        MsgBox "Only " & shpList.Count & " images found. Please ensure 36 images are placed on Page 1.", vbExclamation
+        Exit Sub
+    End If
+
+    Dim i As Integer
+    For i = 1 To totalImages
+        Dim originalShape As shape
+        Set originalShape = shpList(i)
+
+        ' Get original position
+        Dim posX As Double, posY As Double
+        posX = originalShape.PositionX
+        posY = originalShape.PositionY
+
+        If i = 1 Then
+            ' Ensure it's on Layer 1 of Page 1
+            originalShape.MoveToLayer doc.Pages(1).Layers("Layer 1")
+        Else
+            Dim newShape As shape
+            Set newShape = originalShape.Duplicate
+
+            ' Move to Layer 1 of page i
+            newShape.MoveToLayer doc.Pages(i).Layers("Layer 1")
+
+            ' Retain position
+            newShape.SetPosition posX, posY
+
+            ' Delete from Page 1
+            originalShape.Delete
+        End If
+    Next i
+
+    MsgBox "36 images placed on Layer 1 of pages 1 to 36.", vbInformation
+End Sub
+
