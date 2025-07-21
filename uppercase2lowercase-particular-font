@@ -1,0 +1,25 @@
+Sub ConvertUppercaseToLowercase_ForFont()
+    Dim pg As page
+    Dim s As shape
+    Dim tr As TextRange
+    Dim targetFont As String
+    Dim txtLength As Long
+    
+    targetFont = "poshold clearly" ' ? Change to your font name
+
+    For Each pg In ActiveDocument.Pages
+        For Each s In pg.Shapes
+            If s.Type = cdrTextShape Then
+                txtLength = s.Text.Story.Length
+                Set tr = s.Text.Story.Range(1, txtLength)
+                
+                If tr.Font = targetFont Then
+                    s.Text.Story.Text = LCase(s.Text.Story.Text)
+                End If
+            End If
+        Next s
+    Next pg
+
+    MsgBox "All text using '" & targetFont & "' converted to lowercase."
+End Sub
+
